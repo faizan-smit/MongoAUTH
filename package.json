@@ -2,7 +2,7 @@
   "name": "mongoauth",
   "version": "1.0.0",
   "description": "Authentication with jwt and mongodb",
-  "main": "index.js",
+  "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
     "dev": "nodemon server.mjs"
