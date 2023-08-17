@@ -4,6 +4,7 @@
   "description": "Authentication with jwt and mongodb",
   "main": "index.js",
   "scripts": {
+    "start": "node server.mjs",
     "dev": "nodemon server.mjs"
   },
   "author": "Faizan",
