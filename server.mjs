@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser'
 import 'dotenv/config'
 import authRouter from './routes/auth.mjs'
-import commentRouter from './routes/comment.mjs'
-import feedRouter from './routes/feed.mjs'
+// import commentRouter from './routes/comment.mjs'
+// import feedRouter from './routes/feed.mjs'
 import postRouter from './routes/post.mjs'
 import { decode } from 'punycode';
 const __dirname = path.resolve();
@@ -52,6 +52,22 @@ app.use((req, res, next) => { // JWT
 })
 
 app.use("/api/v1", postRouter) // Secure api
+
+app.use("/logout", async (req, res, next) => {
+
+    const token = {logout: true}
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        // expires: new Date(dateAfter2MinInMili)
+    });
+
+    res.status(201).send({
+        message: "logout successful"
+    });
+
+});
 
 
 

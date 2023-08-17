@@ -1,6 +1,6 @@
 
 import express from 'express';
-import {client} from './../../mongodb.mjs'
+import {client} from './../mongodb.mjs'
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 import {
@@ -53,6 +53,9 @@ router.post('/signup', async (req, res, next) => {
 
                             email: req.body.email,
                             password: passwordHash,
+                            firstName: req.body.firstName,
+                            lastName: req.body.lastName,
+                            createdOn: new Date()
 
                         };
 
@@ -131,10 +134,12 @@ router.post('/login', async (req, res, next) => {
     req.body.email = req.body.email.toLowerCase();
 
     try {
-        let result = await userCollection.findOne({ email: req.body.email });
-        console.log("result: ", result);
+        await client.connect();
+            const filter = { email: req.body.email };
+            const myDoc = await col.findOne(filter);
+        console.log("result: ", myDoc);
 
-        if (!result) { // user not found
+        if (!myDoc) { // user not found
             res.status(403).send({
                 message: "email or password incorrect"
             });
@@ -142,14 +147,15 @@ router.post('/login', async (req, res, next) => {
         } else { // user found
 
 
-            const isMatch = await varifyHash(req.body.password, result.password)
+            // console.log(myDoc);
+            const isMatch = await varifyHash(req.body.password, myDoc.password)
 
             if (isMatch) {
                 
                 const token = jwt.sign({
                     isAdmin: false,
-                    firstName: result.firstName,
-                    lastName: result.lastName,
+                    firstName: myDoc.firstName,
+                    lastName: myDoc.lastName,
                     email: req.body.email,
                 }, process.env.SECRET, {
                     expiresIn: '24h'
@@ -161,7 +167,7 @@ router.post('/login', async (req, res, next) => {
                     // expires: new Date(dateAfter2MinInMili)
                 });
 
-                res.send({
+                res.status(200).send({
                     message: "login successful"
                 });
                 return;
@@ -176,6 +182,11 @@ router.post('/login', async (req, res, next) => {
     } catch (e) {
         console.log("error getting data mongodb: ", e);
         res.status(500).send('server error, please try later');
+    }
+    finally{
+
+        await client.close();
+        console.log("closed atlas");
     }
 })
 
